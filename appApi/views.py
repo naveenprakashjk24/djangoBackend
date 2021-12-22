@@ -10,8 +10,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
-from .models import ProjectContractor
-from .serializers import ProjectContractorSerializer, ProjectStageSerializer , ProjectStage
+from .models import ProjectContractor,ProjectStagesMapping, ProjectStage, ProjectAssigningDetails
+from .serializers import ProjectContractorSerializer, ProjectStageSerializer, ProjectstgMappingSerializer, ProjectAssignSerializer
 
 
 @api_view(['GET'])
@@ -114,6 +114,8 @@ def contractor_details(request, pk):
 # class based view
 
 class StagesApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
     # stage lists
     def get(self, request):
         stages = ProjectStage.objects.all()
@@ -130,6 +132,7 @@ class StagesApiView(APIView):
 
 
 class StageDetailsApiview(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, id):
         try:
@@ -162,3 +165,87 @@ class StageDetailsApiview(APIView):
 
 # generic based view
 # test
+
+
+class ProjectstgMapping(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self, request):
+        mapping = ProjectStagesMapping.objects.all()
+        serializers = ProjectstgMappingSerializer(mapping, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ProjectstgMappingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectStgmapUpdate(APIView):
+    permission_classes=[IsAuthenticated]
+    def get_object(self, id):
+        try:
+            return ProjectStagesMapping.objects.get(id=id)
+        except ProjectStagesMapping.DoesNotExist:
+            return HttpResponse({'Error': 'No data found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, id):
+        mapping =  self.get_object(id)
+        serializer = ProjectstgMappingSerializer(mapping)
+        return  Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, id):
+        mapping = self.get_object(id)
+        serializer = ProjectstgMappingSerializer(mapping, request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return  Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        mapping = self.get_object(id)
+        mapping.delete()
+        return Response({'message': 'Deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+class ProjectuserMapping(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self, request):
+        userMap = ProjectAssigningDetails.objects.all()
+        serializer = ProjectAssignSerializer(userMap, many=True)
+        return Response(serializer.data, status= status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ProjectAssignSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class ProjectuserMappingupdate(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get_object(self, id):
+        try:
+            return ProjectAssigningDetails.objects.get(id=id)
+        except ProjectAssigningDetails.DoesNotExist:
+            return Response({'Error': 'No data found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, id):
+        UsrMapping = self.get_object(id)
+        serializer = ProjectAssignSerializer(UsrMapping)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    def post(self, request, id):
+        UserMapping = self.get_object(id)
+        serializer = ProjectAssignSerializer(UserMapping, request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+
+        UsrMapping = self.get_object(id)
+        UsrMapping.delete()
+        return Response({'message': 'Deleted successfully'}, status=status.HTTP_204_NO_CONTENT)

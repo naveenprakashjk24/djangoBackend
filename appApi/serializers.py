@@ -40,3 +40,14 @@ class ProjectStageSerializer(serializers.ModelSerializer):
         model = ProjectStage
         fields = ['id', 'name']
         # fields = '__all__'
+
+class ProjectstgMappingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectStagesMapping
+        # fields = ['id', 'site_name','phase_id','stage_id','sensor_count','start_date','end_date']
+        fields = '__all__'
+
+class ProjectAssignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectAssigningDetails
+        fields = '__all__'
