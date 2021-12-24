@@ -1,5 +1,4 @@
 from django.urls import path, include
-# from .views import contractor_list, restricted, contractor_details, StagesApiView, StageDetailsApiview,ProjectstgMapping, ProjectStgmapUpdate
 from .views import *
 
 urlpatterns = [
