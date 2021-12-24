@@ -14,6 +14,8 @@ urlpatterns = [
     path('stgmapping/<int:id>/', ProjectStgmapUpdate.as_view()),
     path('prjusermap/', ProjectuserMapping.as_view()),
     path('prjusermap/<int:id>/', ProjectuserMappingupdate.as_view()),
+    path('dailyupdates/', DailyUpdatesView.as_view()),
+    path('dailyupdates/<int:id>/', DailyUpdatesView.as_view()),
 
 ]
 

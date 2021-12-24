@@ -1,3 +1,4 @@
+from rest_framework.authentication import SessionAuthentication, BaseAuthentication
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
@@ -10,8 +11,9 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
-from .models import ProjectContractor,ProjectStagesMapping, ProjectStage, ProjectAssigningDetails
-from .serializers import ProjectContractorSerializer, ProjectStageSerializer, ProjectstgMappingSerializer, ProjectAssignSerializer
+from .models import ProjectContractor, ProjectStagesMapping, ProjectStage, ProjectAssigningDetails, ProjectDailyupdates
+from .serializers import ProjectContractorSerializer, ProjectStageSerializer, ProjectstgMappingSerializer, \
+    ProjectAssignSerializer, PjctDailyupdateSerializer
 
 
 @api_view(['GET'])
@@ -161,14 +163,11 @@ class StageDetailsApiview(APIView):
         stages.delete()
         return Response({'message': 'Deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
+
 # end class based view
 
-# generic based view
-# test
-
-
 class ProjectstgMapping(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         mapping = ProjectStagesMapping.objects.all()
@@ -184,7 +183,8 @@ class ProjectstgMapping(APIView):
 
 
 class ProjectStgmapUpdate(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, id):
         try:
             return ProjectStagesMapping.objects.get(id=id)
@@ -192,9 +192,9 @@ class ProjectStgmapUpdate(APIView):
             return HttpResponse({'Error': 'No data found'}, status=status.HTTP_404_NOT_FOUND)
 
     def get(self, request, id):
-        mapping =  self.get_object(id)
+        mapping = self.get_object(id)
         serializer = ProjectstgMappingSerializer(mapping)
-        return  Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, id):
         mapping = self.get_object(id)
@@ -202,20 +202,21 @@ class ProjectStgmapUpdate(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return  Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         mapping = self.get_object(id)
         mapping.delete()
         return Response({'message': 'Deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
+
 class ProjectuserMapping(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         userMap = ProjectAssigningDetails.objects.all()
         serializer = ProjectAssignSerializer(userMap, many=True)
-        return Response(serializer.data, status= status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = ProjectAssignSerializer(data=request.data)
@@ -223,8 +224,9 @@ class ProjectuserMapping(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class ProjectuserMappingupdate(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, id):
         try:
@@ -236,6 +238,7 @@ class ProjectuserMappingupdate(APIView):
         UsrMapping = self.get_object(id)
         serializer = ProjectAssignSerializer(UsrMapping)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request, id):
         UserMapping = self.get_object(id)
         serializer = ProjectAssignSerializer(UserMapping, request.data)
@@ -249,3 +252,28 @@ class ProjectuserMappingupdate(APIView):
         UsrMapping = self.get_object(id)
         UsrMapping.delete()
         return Response({'message': 'Deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+# generic based view
+
+class DailyUpdatesView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin,
+                       mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    serializer_class = PjctDailyupdateSerializer
+    queryset = ProjectDailyupdates.objects.all()
+    lookup_field = "id"
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id=None):
+        if id:
+            return self.retrieve(request)
+        else:
+            return self.list(request)
+
+    def post(self, request):
+        return self.create(request)
+
+    def put(self, request, id=None):
+        return self.update(request, id)
+
+    def delete(self, request, id=None):
+        return self.destroy(request, id)

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from .models import *
 
+
 class UserCreationSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
@@ -41,13 +42,21 @@ class ProjectStageSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
         # fields = '__all__'
 
+
 class ProjectstgMappingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectStagesMapping
         # fields = ['id', 'site_name','phase_id','stage_id','sensor_count','start_date','end_date']
         fields = '__all__'
 
+
 class ProjectAssignSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectAssigningDetails
         fields = '__all__'
+
+
+class PjctDailyupdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectDailyupdates
+        fields = "__all__"
